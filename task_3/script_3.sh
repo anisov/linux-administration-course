@@ -13,7 +13,7 @@ vgremove -y /dev/$BUP_VG
 # Создание зеркального тома для /var и перенос данных из старого /var в новый через монтирование нового тома в /mnt.
 pvcreate /dev/sdc /dev/sdd -y
 vgcreate $VG_Var /dev/sdc /dev/sdd
-lvcreate -L 500M -m1 -n $LV_Var $VG_Var
+lvcreate -L 900M -m1 -n $LV_Var $VG_Var
 
 # Создаём файловую систему.
 mkfs.ext4 /dev/$VG_Var/$LV_Var

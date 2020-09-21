@@ -1,0 +1,9 @@
+[Unit]
+Description=Logfile timer
+
+[Timer]
+OnCalendar=*:*:0/30
+Unit=logfile.service
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,7 @@
+[Unit]
+Description=Logfile service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/sysconfig/logfile
+ExecStart=/vagrant/data/logfile.sh $WORD $LOG

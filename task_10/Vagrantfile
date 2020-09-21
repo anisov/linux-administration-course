@@ -1,0 +1,15 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+    config.vm.box_version = "1804.02"
+    config.vm.define "systemdlesson" do |box|
+        box.vm.box = "centos/7"
+        box.vm.hostname = "bashlesson"
+        box.vm.provider "virtualbox" do |vb|
+            vb.name = "systemdlesson"
+            vb.cpus = 1
+            vb.memory = "256"
+        end
+    end
+  end

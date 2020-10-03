@@ -1,0 +1,19 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+    config.vm.box_version = "1804.02"
+    config.vm.define "ansible-lesson" do |box|
+        box.vm.box = "centos/7"
+        box.vm.hostname = "ansible-lesson"
+        box.vm.provider "virtualbox" do |vb|
+            vb.name = "ansible-lesson"
+            vb.cpus = 1
+            vb.memory = "256"
+        end
+    end
+    config.vm.provision "ansible" do |ansible|
+        ansible.verbose = "v"
+        ansible.playbook = "playbooks/playbook.yml"
+    end
+end

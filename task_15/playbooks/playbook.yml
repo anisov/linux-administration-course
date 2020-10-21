@@ -1,0 +1,13 @@
+---
+- name: Prometheus/Grafana install
+  hosts: server
+  become: true
+  roles:
+    - prometheus-server
+    - grafana
+
+- name: Setup node-exporter
+  hosts: client    
+  become: true
+  roles:
+    - node-exporter

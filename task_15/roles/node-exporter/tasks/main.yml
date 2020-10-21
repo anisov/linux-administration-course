@@ -1,0 +1,29 @@
+--- 
+- name: Download prometheus
+  get_url:
+    url: https://github.com/prometheus/node_exporter/releases/download/v{{ version }}/node_exporter-{{ version }}.linux-amd64.tar.gz
+    dest: /tmp/
+
+- name: Extract prometheus
+  unarchive:
+    src: /tmp/node_exporter-{{ version }}.linux-amd64.tar.gz
+    dest: /tmp/
+    remote_src: yes
+
+- name: Add node-exporter in /usr/local/bin/
+  shell: mv node_exporter /usr/local/bin/
+  args:
+    chdir: /tmp/node_exporter-{{ version }}.linux-amd64
+
+- name: Options for node_exporter service
+  template:
+    dest: /etc/sysconfig/node_exporter
+    src: templates/node_exporter.j2
+
+- name: Create systemd service and start
+  template:
+    dest: /usr/lib/systemd/system/node_exporter.service
+    src: templates/node_exporter.service.j2
+  notify:
+    - daemon reload
+    - start node_exporter

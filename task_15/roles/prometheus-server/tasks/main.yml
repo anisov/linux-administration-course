@@ -1,0 +1,60 @@
+---
+- name: Add user
+  user:
+    name: prometheus
+    comment: Prometheus server user
+    shell: /bin/false
+
+- name: Download prometheus
+  get_url:
+    url: https://github.com/prometheus/prometheus/releases/download/v{{ version }}/prometheus-{{ version }}.linux-amd64.tar.gz
+    dest: /tmp/
+
+- name: Extract prometheus
+  unarchive:
+    src: /tmp/prometheus-{{ version }}.linux-amd64.tar.gz
+    dest: /tmp/
+    remote_src: yes
+
+- name: Add prometheus in /usr/local/bin/
+  shell: mv prometheus /usr/local/bin/
+  args:
+    chdir: /tmp/prometheus-{{ version }}.linux-amd64
+
+- name: Create a directory /etc/prometheus/
+  file:
+    path: /etc/prometheus/
+    state: directory
+
+- name: Change owner/group for /etc/prometheus/
+  file:
+    path: /etc/prometheus/
+    state: directory
+    recurse: yes
+    owner: prometheus
+    group: prometheus
+
+- name: Create a directory /var/lib/prometheus
+  file:
+    path: /var/lib/prometheus
+    state: directory
+    owner: prometheus
+    group: prometheus
+
+- name: Create prometheus.yml 
+  template:
+    dest: /etc/prometheus/prometheus.yml
+    src: templates/prometheus.yml.j2
+
+- name: Options for Prometheus serivce
+  template:
+    dest: /etc/sysconfig/prometheus
+    src: templates/prometheus.j2
+
+- name: Create systemd service and start
+  template:
+    dest: /usr/lib/systemd/system/prometheus.service
+    src: templates/prometheus.service.j2
+  notify:
+    - daemon reload
+    - start prometheus

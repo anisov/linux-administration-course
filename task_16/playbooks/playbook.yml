@@ -1,0 +1,11 @@
+---
+- hosts: log
+  become: yes
+  roles:
+    - master-elk
+
+- hosts: web
+  become: yes
+  roles:
+    - node-elk
+...

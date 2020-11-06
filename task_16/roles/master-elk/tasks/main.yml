@@ -1,0 +1,40 @@
+---
+- name: Install epel-release
+  yum:
+    name:
+      - epel-release
+    state: present
+
+- name: Add ELK Repo
+  yum_repository:
+    name: elasticsearch
+    file: elasticsearch
+    description: Elasticsearch repository for 7.x packages
+    baseurl: https://artifacts.elastic.co/packages/7.x/yum
+    gpgcheck: no
+    gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    enabled: yes
+    repo_gpgcheck: no
+
+- name: Install packages
+  yum:
+    name:
+      - java-1.8.0-openjdk 
+      - elasticsearch
+      - logstash
+      - kibana
+    state: present
+  notify:
+    - Enable ELK
+
+- name: Add configs
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: 'elasticsearch.yml', dest: '/etc/elasticsearch/elasticsearch.yml'}
+    - { src: 'kibana.yml', dest: '/etc/kibana/kibana.yml'}
+    - { src: 'logstash.conf', dest: '/etc/logstash/conf.d/logstash.conf'}
+  notify:
+    - Restart Services
+...

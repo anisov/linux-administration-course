@@ -1,0 +1,10 @@
+setup.template.settings:
+  index.number_of_shards: 3
+  index.number_of_replicas: 1
+
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+output.logstash:
+  hosts: ["192.168.11.100:5044"]

@@ -1,0 +1,20 @@
+---
+- name: Enable ELK
+  service:
+    name: "{{ item }}"
+    enabled: yes
+  with_items:
+    - elasticsearch
+    - logstash
+    - kibana
+
+- name: Restart Services
+  service:
+    name: "{{ item }}"
+    state: restarted
+    daemon_reload: yes
+  with_items:
+    - elasticsearch
+    - logstash
+    - kibana
+...

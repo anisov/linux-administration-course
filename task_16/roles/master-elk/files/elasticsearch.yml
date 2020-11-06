@@ -1,0 +1,3 @@
+node.name: log
+path.data: /var/lib/elasticsearch
+path.logs: /var/log/elasticsearch

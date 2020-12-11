@@ -1,0 +1,73 @@
+---
+# tasks file for roles/ospf
+- name: install packages
+  yum:
+    name: "{{ packages }}"
+    state: "present"
+
+- name: Enable forwarding
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: "1"
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+- name: Enable all forwarding
+  sysctl:
+    name: net.ipv4.conf.all.forwarding
+    value: "1"
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+- name: Disable all rp_filter
+  sysctl:
+    name: net.ipv4.conf.all.rp_filter
+    value: "0"
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+- name: Copy config files on route1
+  copy: 
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: quagga
+    group: quagga
+  with_items:
+      - { src: 'ospfd_route1.conf', dest: '/etc/quagga/ospfd.conf' }
+      - { src: 'zebra_route1.conf', dest: '/etc/quagga/zebra.conf' }
+  when: ansible_hostname == "route1"              
+
+- name: Copy config files on route2
+  copy: 
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: quagga
+    group: quagga
+  with_items:
+      - { src: 'ospfd_route2.conf', dest: '/etc/quagga/ospfd.conf' }
+      - { src: 'zebra_route2.conf', dest: '/etc/quagga/zebra.conf' }
+  when: ansible_hostname == "route2" 
+
+- name: Copy config files on route3
+  copy: 
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: quagga
+    group: quagga
+  with_items:
+      - { src: 'ospfd_route3.conf', dest: '/etc/quagga/ospfd.conf' }
+      - { src: 'zebra_route3.conf', dest: '/etc/quagga/zebra.conf' }
+  when: ansible_hostname == "route3"
+
+- name: Restart Services
+  service:
+    name: "{{ item }}"
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+  with_items:
+    - ospfd
+    - zebra

@@ -1,0 +1,6 @@
+---
+- hosts: all
+  name: ospf
+  become: yes
+  roles:
+    - role: ospf

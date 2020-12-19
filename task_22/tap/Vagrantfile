@@ -1,0 +1,78 @@
+# -*- mode: ruby -*-
+# vim: set ft=ruby :
+home = ENV['HOME']
+
+MACHINES = {
+:server => {
+        :box_name => "centos/7",
+        :net => [
+                   {ip: '192.168.10.10', adapter: 2, netmask: "255.255.255.0", virtualbox__intnet: "global-net"},
+                   {ip: '172.168.10.1', adapter: 3, netmask: "255.255.255.0", virtualbox__intnet: "local-net1"},
+                ]
+  },
+:client => {
+
+        :box_name => "centos/7",
+        :net => [
+                  {ip: '192.168.10.20', adapter: 2, netmask: "255.255.255.0", virtualbox__intnet: "global-net"},
+                  {ip: '172.168.20.1', adapter: 3, netmask: "255.255.255.0", virtualbox__intnet: "local-net2"},                ]
+  },
+}
+
+Vagrant.configure("2") do |config|
+
+  MACHINES.each do |boxname, boxconfig|
+    config.vm.synced_folder "./", "/vagrant"
+    config.vm.define boxname do |box|
+        box.vm.box = boxconfig[:box_name]
+        box.vm.host_name = boxname.to_s
+
+        config.vm.provider "virtualbox" do |v|
+          v.memory = 512
+          v.cpus = 1
+        end
+
+        boxconfig[:net].each do |ipconf|
+          box.vm.network "private_network", ipconf
+        end
+
+        box.vm.provision "shell", inline: <<-SHELL
+          mkdir -p ~root/.ssh
+                cp ~vagrant/.ssh/auth* ~root/.ssh
+        SHELL
+
+        case boxname.to_s
+        when "server"
+          box.vm.provision "shell", run: "always", inline: <<-SHELL
+            setenforce 0
+            echo "net.ipv4.conf.all.forwarding=1" >> /etc/sysctl.conf
+            systemctl restart network.service
+            yum install -y epel-release
+            yum install -y openvpn iperf3 
+            cp /vagrant/files/server.conf /etc/openvpn/server.conf
+            cp /vagrant/files/static.key /etc/openvpn/static.key
+            chown root /etc/openvpn/static.key
+            chmod 600 /etc/openvpn/static.key
+            systemctl start openvpn@server
+            systemctl enable openvpn@server
+            SHELL
+        when "client"
+          box.vm.provision "shell", run: "always", inline: <<-SHELL
+            setenforce 0
+            echo "net.ipv4.conf.all.forwarding=1" >> /etc/sysctl.conf
+            systemctl restart network.service
+            yum install -y epel-release
+            yum install -y openvpn iperf3
+            cp /vagrant/files/client.conf /etc/openvpn/client.conf -n
+            cp /vagrant/files/static.key /etc/openvpn/static.key -n
+            chown root /etc/openvpn/static.key
+            chmod 600 /etc/openvpn/static.key
+            systemctl start openvpn@client
+            systemctl enable openvpn@client
+            SHELL
+        end
+      end
+
+  end
+
+end

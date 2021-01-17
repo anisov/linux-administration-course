@@ -56,9 +56,15 @@ systemctl status named.service
 192.168.50.15
 [vagrant@client2 ~]$ dig @192.168.50.11 web2.dns.lab +short
 192.168.50.16
-[vagrant@client2 ~]$ dig @192.168.50.11 www.newdns.lab +short
-[vagrant@client2 ~]$ dig @192.168.50.10 ns01.ddns.lab +short
-[vagrant@client2 ~]$ dig @192.168.50.10 ns02.ddns.lab +short
+[vagrant@## Запуск
+* `vagrant up`
+
+**ОС**: CentOSclient2 ~]$ dig @192.168.50.10 ns02.ddns.lab +short
 [vagrant@client2 ~]$ dig @192.168.50.11 ns02.ddns.lab +short
 [vagrant@client2 ~]$ dig @192.168.50.11 ns01.ddns.lab +short
 ```
+
+## Запуск
+* `vagrant up`
+
+**ОС**: CentOS

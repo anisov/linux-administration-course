@@ -1,0 +1,60 @@
+---
+- name: Install
+  hosts: inetRouter
+  become: yes
+  tasks:  
+    - name: Copy files
+      copy: 
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: root
+        group: root
+        mode: '0755'
+      with_items:
+        - { src: './files/ifcfg-eth1', dest: '/etc/sysconfig/network-scripts/' }
+        - { src: './files/ifcfg-eth2', dest: '/etc/sysconfig/network-scripts/' } 
+        - { src: './files/ifcfg-bond0', dest: '/etc/sysconfig/network-scripts/' }
+        - { src: './files/route-bond0', dest: '/etc/sysconfig/network-scripts/' }
+
+    - name: Change ip_forward
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        sysctl_set: yes
+        state: present
+        reload: yes
+    
+    - name: Disable SELinux
+      selinux:
+        state: disabled
+
+    - name: Install epel-release
+      yum:
+        name:
+          - epel-release
+        state: present
+
+    - name: Add iptables service
+      yum:
+        name: iptables-services
+        state: present
+        
+    - name: Start iptables
+      systemd:
+        name: iptables
+        state: started
+        enabled: yes
+    
+    - name: Add MASQUERADE
+      shell: iptables -F && iptables -t nat -A POSTROUTING ! -d 192.168.0.0/16 -o eth0 -j MASQUERADE && service iptables save
+
+    - name: Restart Services
+      systemd:
+        name: "{{ item }}"
+        state: restarted
+      with_items:
+        - network
+    
+    - name: Reboot host and wait for it to restart
+      reboot:
+        reboot_timeout: 60

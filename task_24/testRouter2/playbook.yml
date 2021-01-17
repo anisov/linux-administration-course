@@ -1,0 +1,61 @@
+---
+- name: Install
+  hosts: testRouter2
+  become: yes
+  tasks:
+    - name: Copy files
+      copy: 
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: root
+        group: root
+        mode: '0755'
+      with_items:
+        - { src: './files/ifcfg-eth1', dest: '/etc/sysconfig/network-scripts/' }
+        - { src: './files/ifcfg-vlan2', dest: '/etc/sysconfig/network-scripts/' }
+
+    - name: Install epel-release
+      yum:
+        name:
+          - epel-release
+        state: present
+
+    - name: Add iptables service
+      yum:
+        name: iptables-services
+        state: present
+        
+    - name: Disable SELinux
+      selinux:
+        state: disabled
+
+    - name: Change ip_forward
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        sysctl_set: yes
+        state: present
+        reload: yes
+
+    - name: Start iptables
+      systemd:
+        name: iptables
+        state: started
+        enabled: yes
+    
+    - name: Add MASQUERADE
+      shell: iptables -F && iptables -t nat -A POSTROUTING ! -d 192.168.0.0/16 -o eth1 -j MASQUERADE &&  iptables -t nat -A POSTROUTING ! -d 192.168.0.0/16 -o vlan1 -j MASQUERADE && service iptables save
+
+    - name: change eth0 DEFROUTE=no
+      shell: echo "DEFROUTE=no" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+
+    - name: Restart Services
+      systemd:
+        name: "{{ item }}"
+        state: restarted
+      with_items:
+        - network
+    
+    - name: Reboot host and wait for it to restart
+      reboot:
+        reboot_timeout: 60

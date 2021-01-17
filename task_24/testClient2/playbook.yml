@@ -1,0 +1,29 @@
+---
+- name: Install
+  hosts: testClient2
+  become: yes
+  tasks:
+    - name: Copy files
+      copy: 
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: root
+        group: root
+        mode: '0755'
+      with_items:
+        - { src: './files/ifcfg-vlan2', dest: '/etc/sysconfig/network-scripts/' }
+    
+    - name: change eth0 DEFROUTE=no
+      shell: echo "DEFROUTE=no" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+    
+    - name: Restart Services
+      systemd:
+        name: network
+        state: restarted
+      with_items:
+        - network
+    
+    - name: Reboot host and wait for it to restart
+      reboot:
+        reboot_timeout: 60
+

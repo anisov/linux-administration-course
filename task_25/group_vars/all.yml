@@ -1,0 +1,21 @@
+---
+  domain: otus.local
+  server: ipaserver
+  ipserver: 192.168.1.1
+  client: ipaclient
+  ipclient: 192.168.1.2
+  search: otus.local
+  realm: OTUS.LOCAL
+  admin: admin
+  password: "1234567890"
+  dbpassword: "1234567890"
+  ntp_timezone: Europe/Moscow
+
+  # Пользователь
+  username: dmitriy
+  userpassword: "1234567890"
+  givenname: Дмитрий
+  sn: Анисов
+  tel: 89000000000
+  mail: test@test.test
+  

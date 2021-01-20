@@ -1,0 +1,51 @@
+---
+- name: Install packages
+  yum:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+    - ipa-server
+    - ipa-server-dns
+    - epel-release
+    - ntp
+    - tzdata
+
+- name: disable chronyd 
+  systemd:
+    name: chronyd
+    enabled: false
+
+- name: set timezone 
+  timezone:
+    name: "{{ ntp_timezone }}"
+
+- name: enable ntpd
+  systemd:
+    name: ntpd
+    state: restarted
+    enabled: true
+
+- name: create /etc/hosts from template
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+
+- name: Disable SELinux
+  selinux:
+    state: disabled
+
+- name: dbus service restart
+  systemd:
+    name: dbus.service
+    state: restarted
+    enabled: yes
+
+- name: hostname
+  hostname: 
+    name: "{{ server }}.{{ domain }}"
+
+# Устанавливаем сервер FreeIPA
+- name: ipa-server initial
+  ignore_errors: True
+  shell: ipa-server-install -U --hostname={{ server }}.{{ domain }} --domain={{ domain }} --realm={{ realm }} --ds-password={{ dbpassword }} --admin-password={{ password }} --setup-dns --mkhomedir --auto-forwarders --auto-reverse --no-dnssec-validation --allow-zone-overlap

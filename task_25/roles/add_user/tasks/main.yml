@@ -1,0 +1,30 @@
+---
+- name: Create user - "{{ username }}"
+  user:
+    name: "{{ username }}"
+    password: "{{ userpassword | password_hash('sha256') }}" 
+    state: present
+    update_password: on_create
+    create_home: yes
+    generate_ssh_key: yes
+
+- name: Get user keys
+  shell: cat /home/{{ username }}/.ssh/id_rsa.pub
+  register: ssh_key
+
+- name: New user - "{{ username }}"
+  ipa_user:
+    name: "{{ username }}"
+    state: present
+    givenname: "{{ givenname }}"
+    sn: "{{ sn }}"
+    mail:
+    - "{{ mail }}"
+    telephonenumber:
+    - "{{ tel }}"
+    sshpubkey:
+    - "{{ ssh_key.stdout }}" 
+    ipa_host: "{{ server }}.{{ domain }}"
+    ipa_user: "{{ admin }}"
+    ipa_pass: "{{ password }}"  
+

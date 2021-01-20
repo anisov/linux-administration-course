@@ -1,0 +1,43 @@
+---
+- name: packages install
+  yum:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+    - ipa-client
+    - ntp
+    - tzdata
+
+- name: disable chronyd 
+  systemd:
+    name: chronyd
+    enabled: false
+
+- name: set timezone
+  timezone:
+    name: "{{ ntp_timezone }}"
+
+- name: enable ntpd
+  systemd:
+    name: ntpd
+    state: restarted
+    enabled: true
+
+- name: hostname
+  hostname: 
+    name: "{{ client }}.{{ domain }}"
+    
+- name: Disable SELinux
+  selinux:
+    state: disabled
+
+- name: create /etc/hosts from template
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+
+# Устанавливаем клиент FreeIPA
+- name: Install ipa-client
+  shell: ipa-client-install -U --server={{ server }}.{{ domain }} --domain={{ domain }} --realm={{ realm }} --principal={{ admin }} --password={{ password }} --enable-dns-updates --mkhomedir --force-ntpd
+

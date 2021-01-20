@@ -6,61 +6,61 @@ MACHINES = {
   :inetRouter => {
         :box_name => "centos/7",
         :net => [
-                   {adapter: 2, auto_config: false, virtualbox__intnet: "router-net"},
-                   {adapter: 3, auto_config: false, virtualbox__intnet: "router-net"},
+                  {adapter: 2, auto_config: false, virtualbox__intnet: "router-net"},
+                  {adapter: 3, auto_config: false, virtualbox__intnet: "router-net"},
                 ]
   },
   :centralRouter => {
         :box_name => "centos/7",
         :net => [
-                   {adapter: 2, auto_config: false, virtualbox__intnet: "router-net"},
-                   {adapter: 3, auto_config: false, virtualbox__intnet: "router-net"},
-	                 {adapter: 4, auto_config: false, virtualbox__intnet: "central-router-net"},
-	                 {adapter: 5, auto_config: false, virtualbox__intnet: "central-router-net"}
+                  {adapter: 2, auto_config: false, virtualbox__intnet: "router-net"},
+                  {adapter: 3, auto_config: false, virtualbox__intnet: "router-net"},
+                  {adapter: 4, auto_config: false, virtualbox__intnet: "central-router-net"},
+                  {adapter: 5, auto_config: false, virtualbox__intnet: "central-router-net"}
                 ]
   },
   
   :testRouter1 => {
         :box_name => "centos/7",
         :net => [
-				           {adapter: 2, auto_config: false, virtualbox__intnet: "central-router-net"},
-                   {adapter: 3, auto_config: false, virtualbox__intnet: "first-net"}
+                  {adapter: 2, auto_config: false, virtualbox__intnet: "central-router-net"},
+                  {adapter: 3, auto_config: false, virtualbox__intnet: "first-net"}
                 ]
   },
 
   :testRouter2 => {
         :box_name => "centos/7",
         :net => [
-				           {adapter: 2, auto_config: false, virtualbox__intnet: "central-router-net"},
-                   {adapter: 3, auto_config: false, virtualbox__intnet: "second-net"}
+                  {adapter: 2, auto_config: false, virtualbox__intnet: "central-router-net"},
+                  {adapter: 3, auto_config: false, virtualbox__intnet: "second-net"}
                 ]
   },
 
   :testClient1 => {
         :box_name => "centos/7",
         :net => [
-                   {adapter: 2, auto_config: false, virtualbox__intnet: "first-net"}
+                  {adapter: 2, auto_config: false, virtualbox__intnet: "first-net"}
                 ]
   },
   
   :testServer1 => {
         :box_name => "centos/7",
         :net => [
-                   {adapter: 2, auto_config: false, virtualbox__intnet: "first-net"}
+                  {adapter: 2, auto_config: false, virtualbox__intnet: "first-net"}
                 ]
   },
 
   :testClient2 => {
         :box_name => "centos/7",
         :net => [
-                   {adapter: 2, auto_config: false, virtualbox__intnet: "second-net"}
+                  {adapter: 2, auto_config: false, virtualbox__intnet: "second-net"}
                 ]
   },
   
   :testServer2 => {
         :box_name => "centos/7",
         :net => [
-                   {adapter: 2, auto_config: false, virtualbox__intnet: "second-net"}
+                  {adapter: 2, auto_config: false, virtualbox__intnet: "second-net"}
                 ]
   },
 }

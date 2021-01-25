@@ -1,1 +1,5 @@
 *vagrant
+task_26/golang/project
+task_26/nginx/cache
+task_26/nginx/log
+__pycache__

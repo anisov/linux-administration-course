@@ -1,0 +1,14 @@
+FROM python:3.7.5-buster
+
+ENV PYTHONUNBUFFERED 1
+RUN mkdir /code
+WORKDIR /code
+
+COPY . /code/
+
+RUN apt-get update && \
+    apt-get install -y && \
+	pip install -r requirements.txt
+
+EXPOSE 8080
+ENTRYPOINT uvicorn main:app --port 8080 --host 0.0.0.0

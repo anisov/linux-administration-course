@@ -1,0 +1,9 @@
+FROM golang:1.14.7-alpine3.12
+
+RUN mkdir /code
+WORKDIR /code
+
+COPY . /code/
+RUN go mod vendor && go build .
+EXPOSE 8080
+ENTRYPOINT ["./project"]

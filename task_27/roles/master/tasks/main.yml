@@ -1,0 +1,65 @@
+---
+- name: Copy postgresql.conf master
+  template:
+    src: ./files/postgresql.conf
+    dest: "{{ pg_data }}/postgresql.conf"
+    owner: postgres
+    group: postgres
+    mode: '0600'
+  notify: Restart postgres
+
+- name: Make ssg direcotry on master
+  file:
+    path: "/var/lib/pgsql/.ssh"
+    state: directory
+
+- name: Copy ssh key
+  sudo: yes
+  copy: 
+    src: ./keys/id_rsa
+    dest: /var/lib/pgsql/.ssh/
+    owner: postgres
+    group: postgres
+    mode: 0600
+
+- name: Change barman ssh config(StrictHostKeyChecking)
+  lineinfile:
+    path: /var/lib/pgsql/.ssh/config
+    line: StrictHostKeyChecking=no
+    create: yes
+    owner: postgres
+    group: postgres
+
+- name: Change barman ssh config(UserKnownHostsFile)
+  lineinfile:
+    path: /var/lib/pgsql/.ssh/config
+    line: StrictHostKeyChecking=no
+    create: yes
+    owner: postgres
+    group: postgres
+
+- name: Create user for replication
+  become_user: postgres
+  command: psql postgres -c "CREATE USER {{ replication_user }} WITH REPLICATION PASSWORD '{{ replication_password }}'"
+
+- name: Create slot for replication
+  become_user: postgres
+  command: psql postgres -c "SELECT * FROM pg_create_physical_replication_slot('{{ replication_slot }}');"
+
+- name: Create user for barnam
+  become_user: postgres
+  command: psql postgres -c "CREATE USER {{ barman_user }} WITH REPLICATION PASSWORD '{{ barman_password }}' ; alter role barman superuser ; "
+
+- name: Copy pg_hba.conf
+  template:
+    src: pg_hba.conf.j2
+    dest: "{{ pg_data }}/pg_hba.conf"
+    owner: postgres
+    group: postgres
+    mode: '0600'
+  notify: Restart postgres
+
+- name: Create database test
+  become_user: postgres
+  command: psql postgres -c "CREATE DATABASE {{ test_database }} ; "
+...

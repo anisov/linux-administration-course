@@ -1,0 +1,19 @@
+---
+master_ip: 192.168.1.1
+master_hostname: master
+slave_ip: 192.168.1.2
+slave_hostname: slave
+barman_ip: 192.168.1.3
+barman_hostname: barman
+
+replication_user: replication
+replication_password: 1234567890
+replication_slot: replication_slot
+
+barman_user: barman
+barman_password: 1234567890
+barman_slot: barman
+
+pg_data: /var/lib/pgsql/11/data
+test_database: test
+...

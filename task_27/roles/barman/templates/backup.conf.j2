@@ -1,0 +1,8 @@
+[{{ master_hostname }}]
+description =  "Backup from master"
+conninfo = host={{ master_hostname }} user={{ barman_user }} dbname={{ test_database }}
+streaming_conninfo = host={{ master_hostname }} user={{ barman_user }} 
+backup_method = postgres
+streaming_archiver = on
+slot_name = {{ barman_slot }}
+archiver = on

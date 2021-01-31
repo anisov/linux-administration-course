@@ -1,0 +1,106 @@
+---
+- name: Install epel-release
+  yum:
+    name: epel-release
+    state: present
+
+- name: Download barman repo
+  get_url:
+    url: https://dl.2ndquadrant.com/default/release/get/11/rpm
+    dest: /tmp/install-barman-repo.sh
+    mode: 0550
+
+- name: Add barman repo
+  command: /tmp/install-barman-repo.sh
+  args:
+    creates: /etc/yum.repos.d/2ndquadrant-dl-default-release-pg11.repo
+
+- name: Install barman
+  yum:
+    name: barman
+    state: present
+
+- name: Add hosts in /etc/hosts
+  blockinfile:
+    path: /etc/hosts
+    block: |
+       {{ master_ip }} {{ master_hostname }}
+       {{ slave_ip }} {{ slave_hostname }}
+       {{ barman_ip }} {{ barman_hostname }}
+
+- name: Add postgres repo
+  yum:
+    name:  https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    state: present
+
+- name: Install postgresql client
+  yum:
+    name: postgresql11
+    state: present
+
+- name: Copy .pgpass
+  template:
+    src: .pgpass.j2
+    dest: /var/lib/barman/.pgpass
+    mode: 0600
+    owner: barman
+    group: barman
+
+- name: Copy barman.conf
+  template:
+    src: files/barman.conf
+    dest: /etc/barman.conf
+    mode: 0644
+
+- name: Copy pg.conf
+  template:
+    src: backup.conf.j2
+    dest: /etc/barman.d/{{ master_hostname }}.conf
+    mode: 0644
+
+- name: Make ssh directory in barman
+  file:
+    path: "/var/lib/barman/.ssh"
+    state: directory
+
+- name: Copy ssh key in barman
+  copy: 
+    src: ./keys/id_rsa.pub
+    dest: /var/lib/barman/.ssh/authorized_keys
+    owner: barman
+    group: barman
+    mode: 0600
+
+- name: Change barman ssh config(StrictHostKeyChecking)
+  lineinfile:
+    path: /var/lib/barman/.ssh/config
+    line: StrictHostKeyChecking=no
+    create: yes
+    owner: barman
+    group: barman
+
+
+- name: Change barman ssh config(UserKnownHostsFile)
+  sudo: yes
+  lineinfile:
+    path: /var/lib/barman/.ssh/config
+    line: UserKnownHostsFile=/dev/null
+    create: yes
+    owner: barman
+    group: barman
+
+- name:  Create barman slot
+  ignore_errors: yes
+  shell: >
+    barman receive-wal --create-slot {{ master_hostname }} 
+  
+- name: Start barman cron
+  ignore_errors: yes
+  shell: >
+    barman cron
+
+- name:  Start barman switch-wal
+  ignore_errors: yes
+  shell: >
+    barman switch-wal --force --archive {{ master_hostname }}
+...

@@ -1,0 +1,27 @@
+--- 
+  - name: Install Postgres
+    hosts: 
+      - master
+      - slave 
+    become: True
+    roles:
+      - pg_install
+
+  - name: Master Postgres
+    hosts: master
+    become: True
+    roles:
+      - master
+
+  - name: Slave Postgres
+    hosts: slave
+    become: True
+    roles:
+      - slave
+  
+  - name: Barman
+    hosts: barman
+    become: True
+    roles:
+      - barman
+...

@@ -1,0 +1,38 @@
+---
+- name: Install epel-release
+  yum:
+    name: epel-release
+    state: present
+
+- name: Add postgres repository
+  yum:
+    name:  https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    state: present
+  
+- name: Add hosts in /etc/hosts
+  blockinfile:
+    path: /etc/hosts
+    block: |
+        {{ master_ip }} {{ master_hostname }}
+        {{ slave_ip }}  {{ slave_hostname }}
+        {{ barman_ip }}  {{ barman_hostname }}
+
+- name: Install postgres
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - postgresql11
+    - postgresql11-server
+    - postgresql11-contrib
+  notify: Service enable postgres
+
+- name: Init postgres database
+  shell: /usr/pgsql-11/bin/postgresql-11-setup initdb
+  notify: Restart postgres
+
+- name: Install barman cli
+  yum:
+    name: barman-cli
+    state: present
+...

@@ -1,0 +1,33 @@
+---
+- name: Stop PostgreSQL
+  systemd:
+    name: postgresql-11
+    state: stopped
+
+- name: Delete  pg_data
+  file:
+    path: "{{ pg_data }}"
+    state: absent
+
+- name: Сreate pg_data
+  file:
+    path: "{{ pg_data }}"
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: '0700'
+
+- name: Copy db from master
+  command: pg_basebackup -X stream -h {{ master_ip }} -D {{ pg_data }} -P -U replication
+  become: yes
+  become_user: postgres
+
+- name: Copy recovery.conf
+  template:
+    src: recovery.conf.j2
+    dest: "{{ pg_data }}/recovery.conf"
+    owner: postgres
+    group: postgres
+    mode: '0600'
+  notify: Restart postgres
+...
